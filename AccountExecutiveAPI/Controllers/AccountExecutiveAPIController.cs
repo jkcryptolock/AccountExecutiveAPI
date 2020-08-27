@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using AccountExecutiveAPI.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -17,13 +19,25 @@ namespace AccountExecutiveAPI.Controllers
         {
             _logger = logger;
         }
+        
+        Random rnd = new Random();
+
+        private void SetTimeout()
+        {
+            var t = Task.Run(async delegate
+            {
+                await Task.Delay(rnd.Next(2000, 5000));
+            });
+            t.Wait();
+        }
 
         [HttpGet]
         [Route("companies")]
         public string GetCompaniesJson()
         {
+            SetTimeout();
+            
             var companies = new CompaniesRepository();
-
             string output = JsonConvert.SerializeObject(companies.GetCompanies());
 
             return output;
@@ -33,8 +47,9 @@ namespace AccountExecutiveAPI.Controllers
         [Route("users")]
         public string GetUsersJson()
         {
-            var users = new UsersRepository();
+            SetTimeout();
 
+            var users = new UsersRepository();
             string output = JsonConvert.SerializeObject(users.GetUsers());
 
             return output;
@@ -44,6 +59,8 @@ namespace AccountExecutiveAPI.Controllers
         [Route("companies")]
         public string GetAeCompaniesJson([FromBody] string accountExecutive)
         {
+            SetTimeout();
+            
             var companies = new CompaniesRepository();
             dynamic response = companies.GetCompanies();
             List<CompanyData> aeCompanies = new List<CompanyData>();

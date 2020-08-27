@@ -1,5 +1,3 @@
-using System;
-
 namespace AccountExecutiveAPI.Models
 {
     public class CompanyData
