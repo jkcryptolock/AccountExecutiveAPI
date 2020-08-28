@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using AccountExecutiveAPI.Repositories;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 
 namespace AccountExecutiveAPI.Controllers
 {
@@ -26,7 +27,7 @@ namespace AccountExecutiveAPI.Controllers
         {
             var t = Task.Run(async delegate
             {
-                await Task.Delay(rnd.Next(2000, 5000));
+                await Task.Delay(rnd.Next(2000, 4000));
             });
             t.Wait();
         }
@@ -57,17 +58,17 @@ namespace AccountExecutiveAPI.Controllers
 
         [HttpPost]
         [Route("companies")]
-        public string GetAeCompaniesJson([FromBody] string accountExecutive)
+        public string GetAeCompaniesJson([FromBody] AccountExecutiveData accountExecutive)
         {
             SetTimeout();
-            
+
             var companies = new CompaniesRepository();
             dynamic response = companies.GetCompanies();
             List<CompanyData> aeCompanies = new List<CompanyData>();
 
             foreach (var company in response.companies)
             {
-                if (company.accountExecutive == accountExecutive)
+                if (company.accountExecutive == accountExecutive.AccountExecutive)
                 {
                     var listItem = new CompanyData();
                     listItem.Company = company.company;
@@ -85,7 +86,12 @@ namespace AccountExecutiveAPI.Controllers
                 }
             }
 
-            string output = JsonConvert.SerializeObject(aeCompanies);
+            string output = JsonConvert.SerializeObject(
+                aeCompanies,
+                new JsonSerializerSettings 
+                { 
+                    ContractResolver = new CamelCasePropertyNamesContractResolver()
+                });
 
             return output;
         }
