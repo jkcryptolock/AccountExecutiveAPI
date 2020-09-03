@@ -38,8 +38,9 @@ namespace AccountExecutiveAPI.Controllers
         {
             SetTimeout();
             
-            var companies = new CompaniesRepository();
-            string output = JsonConvert.SerializeObject(companies.GetCompanies());
+            var dataAccess = new CompaniesRepository();
+            dynamic companies = dataAccess.GetCompanies();
+            string output = JsonConvert.SerializeObject(companies.companies);
 
             return output;
         }
@@ -50,8 +51,9 @@ namespace AccountExecutiveAPI.Controllers
         {
             SetTimeout();
 
-            var users = new UsersRepository();
-            string output = JsonConvert.SerializeObject(users.GetUsers());
+            var dataAccess = new UsersRepository();
+            dynamic users = dataAccess.GetUsers();
+            string output = JsonConvert.SerializeObject(users.users);
 
             return output;
         }
