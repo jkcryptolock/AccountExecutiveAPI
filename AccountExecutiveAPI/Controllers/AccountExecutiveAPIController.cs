@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using AccountExecutiveAPI.Repositories;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
 
 namespace AccountExecutiveAPI.Controllers
@@ -20,14 +21,14 @@ namespace AccountExecutiveAPI.Controllers
         {
             _logger = logger;
         }
-        
-        Random rnd = new Random();
+
+        private readonly Random _rnd = new Random();
 
         private void SetTimeout()
         {
             var t = Task.Run(async delegate
             {
-                await Task.Delay(rnd.Next(2000, 4000));
+                await Task.Delay(_rnd.Next(2000, 4000));
             });
             t.Wait();
         }
@@ -39,7 +40,7 @@ namespace AccountExecutiveAPI.Controllers
             SetTimeout();
             
             var dataAccess = new CompaniesRepository();
-            dynamic companies = dataAccess.GetCompanies();
+            dynamic companies = CompaniesRepository.GetCompanies();
             string output = JsonConvert.SerializeObject(companies.companies);
 
             return output;
@@ -52,7 +53,7 @@ namespace AccountExecutiveAPI.Controllers
             SetTimeout();
 
             var dataAccess = new UsersRepository();
-            dynamic users = dataAccess.GetUsers();
+            dynamic users = UsersRepository.GetUsers();
             string output = JsonConvert.SerializeObject(users.users);
 
             return output;
@@ -64,31 +65,25 @@ namespace AccountExecutiveAPI.Controllers
         {
             SetTimeout();
 
-            var companies = new CompaniesRepository();
-            dynamic response = companies.GetCompanies();
-            List<CompanyData> aeCompanies = new List<CompanyData>();
+            var dataAccess = new CompaniesRepository();
+            dynamic response = CompaniesRepository.GetCompanies();
+            var aeCompanies = new List<CompanyData>();
 
-            foreach (var company in response.companies)
+            foreach (JObject companyRecord in response.companies)
             {
-                if (company.accountExecutive == accountExecutive.AccountExecutive)
-                {
-                    var listItem = new CompanyData();
-                    listItem.Company = company.company;
-                    listItem.StreetAddress = company.streetAddress;
-                    listItem.City = company.city;
-                    listItem.Id = company.id;
-                    listItem.Phone = company.phone;
-                    listItem.State = company.state;
-                    listItem.ZipCode = company.zipCode;
-                    listItem.AccountExecutive = company.accountExecutive;
-                    listItem.ActiveContracts = company.activeContracts;
-                    listItem.ActiveTickets = company.activeTickets;
+                var company = companyRecord.ToObject<CompanyData>();
 
-                    aeCompanies.Add(listItem);
+                if (company == null) continue;
+                
+                var companyAe = company.AccountExecutive;
+                
+                if (string.Equals(companyAe, accountExecutive.AccountExecutive, StringComparison.CurrentCultureIgnoreCase))
+                {
+                    aeCompanies.Add(company);
                 }
             }
 
-            string output = JsonConvert.SerializeObject(
+            var output = JsonConvert.SerializeObject(
                 aeCompanies,
                 new JsonSerializerSettings 
                 { 

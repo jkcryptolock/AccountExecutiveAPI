@@ -5,9 +5,9 @@ namespace AccountExecutiveAPI.Repositories
 {
     public class CompaniesRepository
     {
-        public JObject GetCompanies()
+        public static JObject GetCompanies()
         {
-            JObject companies = JObject.Parse(File.ReadAllText(@"Data/Companies.json"));
+            var companies = JObject.Parse(File.ReadAllText(@"Data/Companies.json"));
 
             return companies;
         }

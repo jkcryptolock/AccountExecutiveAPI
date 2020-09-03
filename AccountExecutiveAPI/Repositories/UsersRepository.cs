@@ -5,9 +5,9 @@ namespace AccountExecutiveAPI.Repositories
 {
     public class UsersRepository
     {
-        public JObject GetUsers()
+        public static JObject GetUsers()
         {
-            JObject users = JObject.Parse(File.ReadAllText(@"Data/Users.json"));
+            var users = JObject.Parse(File.ReadAllText(@"Data/Users.json"));
 
             return users;
         }
